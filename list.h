@@ -2,6 +2,7 @@
 #define _CARDINAL_LIST_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct ListNode ListNode;
 typedef struct List List;
@@ -25,6 +26,11 @@ List_Length(List *a);
 void
 List_Remove(List *a,
             uint64_t index);
+
+uint64_t
+List_Find(List *a,
+		  bool (*finder)(void *val, void *s_val),
+		  void *s_val);
 
 void
 List_Free(List *a);

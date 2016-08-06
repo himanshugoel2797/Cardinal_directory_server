@@ -4,6 +4,15 @@
 #include "mount_db.h"
 
 
+typedef struct {
+	int flags;
+	int mode;
+	uint64_t fd;
+} FileDescriptor;
+
+static List *fds;
+static uint64_t fd_base = 0;
+
 static FileSystemObject *root;
 
 int
@@ -22,6 +31,9 @@ strcmp_path(const char *a, const char *b) {
 
 void
 InitializeDB(void) {
+
+	fds = List_Create();
+
 	root = malloc(sizeof(FileSystemObject));
 
 	root->ObjectType = FileSystemObjectType_Directory;
@@ -115,14 +127,16 @@ CreateDirectory(char *path){
 	dir->ObjectType = FileSystemObjectType_Directory;
 	strcpy(dir->Name, offset);
 	dir->Children = List_Create();
+	dir->Parent = r;
+
+	if(List_AddEntry(r->Children, dir) != ListError_None)
+		return free(dir), FileSystemError_AllocationFailed;
 
 	return FileSystemError_None;
 }
 
 FileSystemError
-CreateFile(char *path, uint64_t *fd) {
-
-	static uint64_t file_ids = 0;
+CreateFile(char *path, FileHandlers *handlers) {
 
 	char *offset = NULL;
 	FileSystemObject *r = NULL;
@@ -139,8 +153,11 @@ CreateFile(char *path, uint64_t *fd) {
 
 	dir->ObjectType = FileSystemObjectType_File;
 	strcpy(dir->Name, offset);
-	dir->FileID = ++file_ids;
-	if(fd != NULL)*fd = dir->FileID;
+	dir->handlers = handlers;
+	dir->Parent = r;
+
+	if(List_AddEntry(r->Children, dir) != ListError_None)
+		return free(dir), FileSystemError_AllocationFailed;
 
 	return FileSystemError_None;
 }
@@ -164,6 +181,69 @@ RegisterMount(char *path, uint64_t pid) {
 	dir->ObjectType = FileSystemObjectType_MountPoint;
 	strcpy(dir->Name, offset);
 	dir->TargetPID = pid;
+	dir->Parent = r;
+	
+	if(List_AddEntry(r->Children, dir) != ListError_None)
+		return free(dir), FileSystemError_AllocationFailed;
 
 	return FileSystemError_None;
+}
+
+
+uint64_t
+AllocateFileDescriptor(int flags, int mode) {
+	uint64_t fd = ++fd_base;
+
+	FileDescriptor *desc = malloc(sizeof(FileDescriptor));
+	if(desc == NULL)
+		return -1;
+
+	desc->fd = fd;
+	desc->flags = flags;
+	desc->mode = mode;
+
+	if(List_AddEntry(fds, desc) != ListError_None)
+		return free(desc), -1;
+
+	return fd;
+}
+static bool finder(void *val, void *s_val) {
+	FileDescriptor *f_desc = (FileDescriptor*)val;
+	if((uint64_t)s_val == f_desc->fd)
+		return true;
+	return false;
+}
+
+bool
+GetFileDescriptor(uint64_t fd, int *flags, int *mode) {
+
+	if(fd >= fd_base)
+		return false;
+
+	uint64_t index = List_Find(fds, finder, (void*)fd);
+	if(index == -1)
+		return false;
+
+	FileDescriptor *f_desc = List_EntryAt(fds, index);
+
+	if(flags != NULL)*flags = f_desc->flags;
+	if(mode != NULL)*mode = f_desc->mode;
+	return true;
+}
+
+void
+FreeFileDescriptor(uint64_t fd){
+
+	if(fd >= fd_base)
+		return;
+
+	uint64_t index = List_Find(fds, finder, (void*)fd);
+	if(index == -1)
+		return;
+
+	FileDescriptor *f_desc = List_EntryAt(fds, index);
+	List_Remove(fds, index);
+	free(f_desc);
+
+	return;
 }

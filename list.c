@@ -57,6 +57,31 @@ List_Length(List *a) {
     return val;
 }
 
+
+uint64_t
+List_Find(List *a,
+          bool (*finder)(void *val, void *s_val),
+          void *s_val) {
+    if(finder == NULL)
+        return -1;
+
+    uint64_t checked_vals = 0;
+    uint64_t n = a->last_accessed_index;
+
+    while(checked_vals != a->entry_count) {
+
+        if(finder(List_EntryAt(a, n), s_val))
+        {
+            return n;
+        }
+
+        n = (n + 1) % a->entry_count;
+        checked_vals++;
+    }
+
+    return -1;
+}
+
 void
 List_Remove(List *a,
             uint64_t index) {

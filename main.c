@@ -5,12 +5,14 @@
 #include <cardinal/file_server.h>
 
 #include "mount_db.h"
+#include "interface_provider.h"
 #include "file_request_handlers.h"
 
 int main() {
 
 	RegisterSpecialDestination(CARDINAL_IPCDEST_FILESERVER);
 	InitializeDB();
+	InitializeInterface();
 
 	Message *m = malloc(UINT16_MAX);
 	while(true) {
