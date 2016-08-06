@@ -4,7 +4,7 @@
 
 void
 HandleOpenRequest(Message *m) {
-	struct OpenRequest *open_req = (struct OpenRequest*)m->Content;
+	struct OpenRequest *open_req = (struct OpenRequest*)m;
 
-		
+	
 }

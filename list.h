@@ -1,7 +1,7 @@
 #ifndef _CARDINAL_LIST_H_
 #define _CARDINAL_LIST_H_
 
-#include "types.h"
+#include <stdint.h>
 
 typedef struct ListNode ListNode;
 typedef struct List List;
