@@ -1,5 +1,6 @@
 #include <stdint.h>
 
+#include <time.h>
 #include <cardinal/file_server.h>
 
 #include "file_request_handlers.h"
@@ -8,6 +9,7 @@
 void
 HandleOpenRequest(Message *m) {
 	struct OpenRequest *open_req = (struct OpenRequest*)m;
+	struct OpenResponse response;
 
 	FileSystemObject *fs_obj = ParsePath(open_req->path);
 
@@ -19,5 +21,31 @@ HandleOpenRequest(Message *m) {
 	}else if(fs_obj->ObjectType == FileSystemObjectType_MountPoint)
 	{
 		//Direct request to mount point service and return the PID returned by it
+		uint64_t src = open_req->m.SourcePID;
+
+		open_req->m.SourcePID = CARDINAL_IPCDEST_FILESERVER;
+		open_req->m.DestinationPID = fs_obj->TargetPID;
+
+		PostIPCMessages((Message**)&open_req, 1);
+
+		struct timespec t;
+		t.tv_sec = 0;
+		t.tv_nsec = 100;
+
+		while(GetIPCMessageFrom((Message*)&response, fs_obj->TargetPID, open_req->m.MsgID) != 1)
+			nanosleep(&t, NULL);
+
+		response.m.SourcePID = CARDINAL_IPCDEST_FILESERVER;
+		response.m.DestinationPID = src;
+
+		PostIPCMessages((Message**)&response, 1);
+		return;
 	}
+
+	response.msg_type = CARDINAL_MSG_TYPE_OPENRESPONSE;
+	response.fd = fd;
+	response.targetPID = CARDINAL_IPCDEST_FILESERVER;
+
+	PostIPCMessages((Message**)&response, 1);
+	return;
 }

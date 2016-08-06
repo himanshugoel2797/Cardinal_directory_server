@@ -8,6 +8,7 @@ typedef struct {
 	int flags;
 	int mode;
 	uint64_t fd;
+	uint64_t hash;
 } FileDescriptor;
 
 static List *fds;
@@ -189,9 +190,21 @@ RegisterMount(char *path, uint64_t pid) {
 	return FileSystemError_None;
 }
 
+uint64_t
+HashPath(const char *str) {
+	uint64_t hash = 0;
+
+	//This may need to be updated to properly account for unicode
+
+	for(int i = 0; i < strlen(str); i++) {
+		hash = (hash * 131 + str[i]);
+	}
+
+	return hash;
+}
 
 uint64_t
-AllocateFileDescriptor(int flags, int mode) {
+AllocateFileDescriptor(int flags, int mode, uint64_t hash) {
 	uint64_t fd = ++fd_base;
 
 	FileDescriptor *desc = malloc(sizeof(FileDescriptor));
@@ -201,6 +214,7 @@ AllocateFileDescriptor(int flags, int mode) {
 	desc->fd = fd;
 	desc->flags = flags;
 	desc->mode = mode;
+	desc->hash = hash;
 
 	if(List_AddEntry(fds, desc) != ListError_None)
 		return free(desc), -1;
@@ -215,7 +229,7 @@ static bool finder(void *val, void *s_val) {
 }
 
 bool
-GetFileDescriptor(uint64_t fd, int *flags, int *mode) {
+GetFileDescriptor(uint64_t fd, int *flags, int *mode, uint64_t *hash) {
 
 	if(fd >= fd_base)
 		return false;
@@ -228,6 +242,7 @@ GetFileDescriptor(uint64_t fd, int *flags, int *mode) {
 
 	if(flags != NULL)*flags = f_desc->flags;
 	if(mode != NULL)*mode = f_desc->mode;
+	if(hash != NULL)*hash = f_desc->hash;
 	return true;
 }
 
@@ -247,3 +262,4 @@ FreeFileDescriptor(uint64_t fd){
 
 	return;
 }
+

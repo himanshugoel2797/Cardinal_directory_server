@@ -23,10 +23,13 @@ typedef enum {
 } FileSystemObjectType;
 
 uint64_t
-AllocateFileDescriptor(int flags, int mode);
+HashPath(const char *str);
+
+uint64_t
+AllocateFileDescriptor(int flags, int mode, uint64_t hash);
 
 bool
-GetFileDescriptor(uint64_t fd, int *flags, int *mode);
+GetFileDescriptor(uint64_t fd, int *flags, int *mode, uint64_t *hash);
 
 void
 FreeFileDescriptor(uint64_t fd);
@@ -39,7 +42,8 @@ struct FileHandlers {
 	int (*write)(FileHandlers *handlers, uint64_t fd, void *buf, size_t cnt);
 };
 
-typedef struct {
+typedef struct FileSystemObject FileSystemObject;
+struct FileSystemObject{
 	FileSystemObject *Parent;
 	FileSystemObjectType ObjectType;
 	char Name[NAME_MAX];
@@ -49,7 +53,7 @@ typedef struct {
 		List *Children;
 		FileHandlers *handlers;
 	};
-} FileSystemObject;
+};
 
 void
 InitializeDB(void);
