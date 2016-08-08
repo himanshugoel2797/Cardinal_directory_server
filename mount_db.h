@@ -68,6 +68,6 @@ FileSystemError
 RegisterMount(char *path, uint64_t pid);
 
 FileSystemObject*
-ParsePath(const char *path);
+ParsePath(char *path);
 
 #endif

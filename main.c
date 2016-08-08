@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include <cardinal/ipc.h>
 #include <cardinal/file_server.h>
@@ -14,9 +15,15 @@ int main() {
 	InitializeDB();
 	InitializeInterface();
 
+
+	struct timespec t;
+	t.tv_sec = 0;
+	t.tv_nsec = 100;
+
 	Message *m = malloc(UINT16_MAX);
 	while(true) {
-		while(!GetIPCMessageFrom(m, 0, 0));
+		while(!GetIPCMessageFrom(m, 0, 0))
+			nanosleep(&t, NULL);
 
 		struct OpenRequest * test_req = (struct OpenRequest*) m;
 

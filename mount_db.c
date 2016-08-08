@@ -43,9 +43,12 @@ InitializeDB(void) {
 }
 
 FileSystemObject*
-ParsePath(const char *path) {
+ParsePath(char *path) {
 	FileSystemObject *r = root;
 	
+	if(strlen(path) == 0)
+		return r;
+
 	if(path[0] != '/')
 		return NULL;
 
@@ -79,6 +82,8 @@ FileSystemError
 SetupEntry(char *path, FileSystemObject **obj, char **name) {
 	//Extract the directory name
 	size_t path_len = strnlen(path, PATH_MAX);
+	char *path_c = malloc(path_len);
+	strncpy(path_c, path, path_len);
 
 	if(path_len == PATH_MAX)
 		return FileSystemError_PathTooLong;
@@ -86,18 +91,18 @@ SetupEntry(char *path, FileSystemObject **obj, char **name) {
 	char *offset = NULL;
 
 	for(size_t i = path_len - 1; i >= 0; i--){
-		if(path[i] == '/' && i != 0) {
-			offset = &path[i + 1];
+		if(path_c[i] == '/') {
+			offset = &path_c[i + 1];
 
 			if(strlen(offset) >= NAME_MAX)
 				return FileSystemError_NameTooLong;
 
-			path[i] = 0;
+			path_c[i] = 0;
 			break;
 		}
 	}
 
-	FileSystemObject* r = ParsePath(path);
+	FileSystemObject* r = ParsePath(path_c);
 	if(r == NULL)
 		return FileSystemError_PathDoesNotExist;
 
