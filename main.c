@@ -40,6 +40,21 @@ int main() {
 			case CARDINAL_MSG_TYPE_WRITEREQUEST:
 				HandleWriteRequest(m);
 			break;
+			case CARDINAL_MSG_TYPE_MOUNTREQUEST:
+				HandleMountRequest(m);
+			break;
+			case CARDINAL_MSG_TYPE_DIRENTRYREQUEST:
+				HandleDirentryRequest(m);
+			break;
+			case CARDINAL_MSG_TYPE_LINKREQUEST:
+				HandleLinkRequest(m);
+			break;
+			case CARDINAL_MSG_TYPE_UNLINKREQUEST:
+				HandleUnlinkRequest(m);
+			break;
+			case CARDINAL_MSG_TYPE_STATREQUEST:
+				HandleStatRequest(m);
+			break;
 		}
 
 	}

@@ -9,6 +9,7 @@ typedef struct {
 	int mode;
 	uint64_t fd;
 	uint64_t hash;
+	FileSystemObject *obj;
 } FileDescriptor;
 
 static List *fds;
@@ -209,7 +210,7 @@ HashPath(const char *str) {
 }
 
 uint64_t
-AllocateFileDescriptor(int flags, int mode, uint64_t hash) {
+AllocateFileDescriptor(int flags, int mode, uint64_t hash, FileSystemObject *m) {
 	uint64_t fd = ++fd_base;
 
 	FileDescriptor *desc = malloc(sizeof(FileDescriptor));
@@ -220,6 +221,7 @@ AllocateFileDescriptor(int flags, int mode, uint64_t hash) {
 	desc->flags = flags;
 	desc->mode = mode;
 	desc->hash = hash;
+	desc->obj = m;
 
 	if(List_AddEntry(fds, desc) != ListError_None)
 		return free(desc), -1;
@@ -234,7 +236,7 @@ static bool finder(void *val, void *s_val) {
 }
 
 bool
-GetFileDescriptor(uint64_t fd, int *flags, int *mode, uint64_t *hash) {
+GetFileDescriptor(uint64_t fd, int *flags, int *mode, uint64_t *hash, FileSystemObject **a) {
 
 	if(fd >= fd_base)
 		return false;
@@ -248,6 +250,8 @@ GetFileDescriptor(uint64_t fd, int *flags, int *mode, uint64_t *hash) {
 	if(flags != NULL)*flags = f_desc->flags;
 	if(mode != NULL)*mode = f_desc->mode;
 	if(hash != NULL)*hash = f_desc->hash;
+	if(a != NULL)*a = f_desc->obj;
+
 	return true;
 }
 

@@ -22,25 +22,7 @@ typedef enum {
 	FileSystemObjectType_File
 } FileSystemObjectType;
 
-uint64_t
-HashPath(const char *str);
-
-uint64_t
-AllocateFileDescriptor(int flags, int mode, uint64_t hash);
-
-bool
-GetFileDescriptor(uint64_t fd, int *flags, int *mode, uint64_t *hash);
-
-void
-FreeFileDescriptor(uint64_t fd);
-
 typedef struct FileHandlers FileHandlers;
-struct FileHandlers {
-	uint64_t (*open)(FileHandlers *handlers, const char *file, int flags, int mode);
-	int (*close)(FileHandlers *handlers, uint64_t fd);
-	int (*read)(FileHandlers *handlers, uint64_t fd, void *buf, size_t cnt);
-	int (*write)(FileHandlers *handlers, uint64_t fd, void *buf, size_t cnt);
-};
 
 typedef struct FileSystemObject FileSystemObject;
 struct FileSystemObject{
@@ -54,6 +36,25 @@ struct FileSystemObject{
 		FileHandlers *handlers;
 	};
 };
+
+struct FileHandlers {
+	uint64_t (*open)(FileSystemObject *handlers, const char *file, int flags, int mode);
+	int (*close)(FileSystemObject *handlers, uint64_t fd);
+	int (*read)(FileSystemObject *handlers, uint64_t fd, void *buf, size_t cnt);
+	int (*write)(FileSystemObject *handlers, uint64_t fd, void *buf, size_t cnt);
+};
+
+uint64_t
+HashPath(const char *str);
+
+uint64_t
+AllocateFileDescriptor(int flags, int mode, uint64_t hash, FileSystemObject *m);
+
+bool
+GetFileDescriptor(uint64_t fd, int *flags, int *mode, uint64_t *hash, FileSystemObject **a);
+
+void
+FreeFileDescriptor(uint64_t fd);
 
 void
 InitializeDB(void);

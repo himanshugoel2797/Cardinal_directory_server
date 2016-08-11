@@ -15,15 +15,13 @@ HandleOpenRequest(Message *m) {
 
 	uint64_t fd = -1;
 	
-	response.m.SourcePID = CARDINAL_IPCDEST_FILESERVER;
-	response.m.DestinationPID = open_req->m.SourcePID;
-	response.m.MsgID = open_req->m.MsgID;
+	FILL_RESPONSE(&response, open_req)
 	response.m.Size = sizeof(struct OpenResponse);
 
 	if(fs_obj != NULL){
 		if(fs_obj->ObjectType == FileSystemObjectType_File)
 		{
-			fd = fs_obj->handlers->open(fs_obj->handlers, open_req->path, (int)open_req->flags, (int)open_req->mode);	
+			fd = fs_obj->handlers->open(fs_obj, open_req->path, (int)open_req->flags, (int)open_req->mode);	
 		}
 		else if(fs_obj->ObjectType == FileSystemObjectType_MountPoint)
 		{
