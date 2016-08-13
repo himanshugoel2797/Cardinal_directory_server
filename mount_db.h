@@ -29,6 +29,7 @@ struct FileSystemObject{
 	FileSystemObject *Parent;
 	FileSystemObjectType ObjectType;
 	char Name[NAME_MAX];
+	void *additionalData;
 
 	union{
 		uint64_t TargetPID;

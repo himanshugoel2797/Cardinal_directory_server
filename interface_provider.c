@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "interface_provider.h"
 #include "list.h"
@@ -47,8 +48,7 @@ int read_mount(FileSystemObject *handlers, uint64_t fd, void *buf, size_t cnt) {
 	if(hash != mountPath_hash)
 		return -1;
 
-
-
+	return -EBADF;
 }
 
 int write_mount(FileSystemObject *handlers, uint64_t fd, void *buf, size_t cnt) {
@@ -64,6 +64,13 @@ int write_mount(FileSystemObject *handlers, uint64_t fd, void *buf, size_t cnt) 
 	if(hash != mountPath_hash)
 		return -1;
 
+	const char *cmd = (const char*)buf;
+	const char *cmd_name = "mount";
+
+	for(int i = 0; i < sizeof("mount"); i++) {
+		if(cmd[i] != cmd_name[i])
+			__asm__("hlt");
+	}
 
 }
 
@@ -71,6 +78,7 @@ bool
 InitializeInterface(void) {
 	if(CreateDirectory("/srv") != FileSystemError_None)
 		return false;
+
 
 	if(CreateDirectory("/srv/fs") != FileSystemError_None)
 		return false;
@@ -80,7 +88,6 @@ InitializeInterface(void) {
 	mnt_handlers->close = close_mount;
 	mnt_handlers->read = read_mount;
 	mnt_handlers->write = write_mount;
-
 
 	if(CreateFile("/srv/fs/mount", mnt_handlers) != FileSystemError_None)
 		return false;

@@ -8,5 +8,7 @@
 
 void
 HandleMountRequest(Message *m) {
+	struct MountRequest *mnt_req = (struct MountRequest*)m;
+
 	
 }

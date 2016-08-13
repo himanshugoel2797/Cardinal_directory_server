@@ -12,6 +12,7 @@ HandleOpenRequest(Message *m) {
 	struct OpenResponse response;
 
 	FileSystemObject *fs_obj = ParsePath(open_req->path);
+	if(fs_obj == NULL) *(uint8_t*)0 = 1;
 
 	uint64_t fd = -1;
 	
@@ -53,6 +54,7 @@ HandleOpenRequest(Message *m) {
 	response.fd = fd;
 	response.targetPID = CARDINAL_IPCDEST_FILESERVER;
 
+	if(fd == -1)__asm__("hlt");
 	Message *ma = (Message*)&response;
 	PostIPCMessages(&ma, 1);
 	return;

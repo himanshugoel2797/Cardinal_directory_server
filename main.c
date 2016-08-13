@@ -58,5 +58,6 @@ int main() {
 		}
 
 	}
-
+	
+	free(m);
 }

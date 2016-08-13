@@ -53,11 +53,11 @@ ParsePath(char *path) {
 	if(path[0] != '/')
 		return NULL;
 
-	path++;
 
 	while(path[0] != 0) {
+	path++;
 
-
+            FileSystemObject *b = r;
 		uint64_t i = 0;
 		for(; i < List_Length(r->Children); i++) {
 
@@ -65,11 +65,11 @@ ParsePath(char *path) {
 
 			if(strcmp_path(a->Name, path) && (path[strlen(a->Name)] == '/' || path[strlen(a->Name)] == 0)) {
 				r = a;
-				path += strlen(a->Name) + 1;
+				path += strlen(a->Name);
 				break;
 			}
 		}
-		if(i == List_Length(r->Children))
+		if(i == List_Length(b->Children))
 			return NULL;
 
 		if(r->ObjectType == FileSystemObjectType_MountPoint || r->ObjectType == FileSystemObjectType_File)
@@ -82,11 +82,11 @@ ParsePath(char *path) {
 FileSystemError
 SetupEntry(char *path, FileSystemObject **obj, char **name) {
 	//Extract the directory name
-	size_t path_len = strnlen(path, PATH_MAX);
+	size_t path_len = strnlen(path, PATH_MAX) + 1;
 	char *path_c = malloc(path_len);
 	strncpy(path_c, path, path_len);
 
-	if(path_len == PATH_MAX)
+	if(path_len >= PATH_MAX)
 		return FileSystemError_PathTooLong;
 
 	char *offset = NULL;
@@ -102,15 +102,17 @@ SetupEntry(char *path, FileSystemObject **obj, char **name) {
 			break;
 		}
 	}
+	if(offset == NULL)
+		return FileSystemError_PathInvalid;
 
 	FileSystemObject* r = ParsePath(path_c);
 	if(r == NULL)
 		return FileSystemError_PathDoesNotExist;
 
-	offset[-1] = '/';
+	free(path_c);
 
 	if(obj != NULL)*obj = r;
-	if(name != NULL)*name = offset;
+	if(name != NULL)*name = path + (offset - path_c);
 
 	return FileSystemError_None;
 }

@@ -5,7 +5,7 @@
 
 //TODO: Implement system to handle list of service provider mounts and server files
 
-#define FILL_RESPONSE(a, b) (a)->m.MsgID = (b)->m.MsgID; (a)->m.SourcePID = (b)->m.SourcePID; (a)->m.DestinationPID = (b)->m.DestinationPID;
+#define FILL_RESPONSE(a, b) (a)->m.MsgID = (b)->m.MsgID; (a)->m.SourcePID = (b)->m.DestinationPID; (a)->m.DestinationPID = (b)->m.SourcePID;
 
 void
 HandleOpenRequest(Message *m);
