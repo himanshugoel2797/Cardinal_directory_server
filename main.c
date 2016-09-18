@@ -10,8 +10,6 @@
 #include "file_request_handlers.h"
 
 int main() {
-
-    SetupTestbed();
     
 	RegisterSpecialDestination(CARDINAL_IPCDEST_FILESERVER);
 	InitializeDB();
