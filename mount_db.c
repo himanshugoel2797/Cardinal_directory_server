@@ -240,7 +240,7 @@ static bool finder(void *val, void *s_val) {
 bool
 GetFileDescriptor(uint64_t fd, int *flags, int *mode, uint64_t *hash, FileSystemObject **a) {
 
-	if(fd >= fd_base)
+	if(fd > fd_base)
 		return false;
 
 	uint64_t index = List_Find(fds, finder, (void*)fd);

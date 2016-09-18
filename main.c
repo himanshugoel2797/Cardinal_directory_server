@@ -11,6 +11,8 @@
 
 int main() {
 
+    SetupTestbed();
+    
 	RegisterSpecialDestination(CARDINAL_IPCDEST_FILESERVER);
 	InitializeDB();
 	InitializeInterface();
@@ -20,7 +22,7 @@ int main() {
 	t.tv_sec = 0;
 	t.tv_nsec = 100;
 
-	Message *m = malloc(UINT16_MAX);
+	Message *m = malloc(MAX_MESSAGE_SIZE);
 	while(true) {
 		while(!GetIPCMessageFrom(m, 0, 0))
 			nanosleep(&t, NULL);
@@ -55,6 +57,9 @@ int main() {
 			case CARDINAL_MSG_TYPE_STATREQUEST:
 				HandleStatRequest(m);
 			break;
+                        case CARDINAL_MSG_TYPE_FD2PATHREQUEST:
+                        
+                        break;
 		}
 
 	}

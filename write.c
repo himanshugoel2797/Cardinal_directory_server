@@ -9,7 +9,6 @@
 
 void
 HandleWriteRequest(Message *m) {
-	__asm__("hlt");
 	struct WriteRequest *write_req = (struct WriteRequest*)m;
 
 	struct WriteResponse write_resp;

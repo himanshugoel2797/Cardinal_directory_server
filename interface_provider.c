@@ -67,11 +67,12 @@ int write_mount(FileSystemObject *handlers, uint64_t fd, void *buf, size_t cnt) 
 	const char *cmd = (const char*)buf;
 	const char *cmd_name = "mount";
 
-	for(int i = 0; i < sizeof("mount"); i++) {
+	for(int i = 0; i < sizeof("mount") - 1; i++) {
 		if(cmd[i] != cmd_name[i])
 			__asm__("hlt");
 	}
-
+        
+        return 5;
 }
 
 bool
